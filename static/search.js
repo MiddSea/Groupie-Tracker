@@ -23,3 +23,13 @@ document.getElementById('searchInput').addEventListener('input', function(e) {
             suggestions.style.display = artists.length ? 'block' : 'none';
         });
 });
+
+// Add loading feedback
+searchInput.addEventListener('input', function() {
+    suggestions.innerHTML = '<div class="loading">Searching...</div>';
+  });
+  
+  // Add error feedback
+  function showSearchError() {
+    suggestions.innerHTML = '<div class="error">Search unavailable</div>';
+  }

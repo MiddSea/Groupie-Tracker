@@ -6,9 +6,10 @@
 </head>
 <body>
     <div class="error-container">
-        <h1 class="error-code">{{.StatusCode}}</h1>
-        <p class="error-message">{{.Message}}</p>
-        <a href="/" class="home-button">Return Home</a>
-    </div>
+        <h1 aria-live="polite">Oops! Error {{.StatusCode}}</h1>
+        <p>{{.Message}}</p>
+        <img src="/static/error-illustration.svg" alt="" aria-hidden="true">
+        <a href="/" class="primary-btn">Return Home</a>
+      </div>
 </body>
 </html>

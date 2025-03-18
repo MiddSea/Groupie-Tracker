@@ -4,12 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/patrickmn/go-cache"
 )
 
 // Data structures
@@ -52,10 +55,35 @@ var (
 	artistsDetails []ArtistDetails
 	dataMutex      sync.RWMutex
 	templates      *template.Template
+	apiCache       = cache.New(5*time.Minute, 10*time.Minute)
 )
 
 func init() {
 	templates = template.Must(template.ParseGlob("templates/*.html"))
+}
+
+func fetchWithCache(url string, v interface{}) error {
+	if cached, found := apiCache.Get(url); found {
+		return json.Unmarshal(cached.([]byte), v)
+	}
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("status code %d", resp.StatusCode)
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	apiCache.Set(url, body, cache.DefaultExpiration)
+	return json.Unmarshal(body, v)
 }
 
 func fetchAllData() ([]ArtistDetails, error) {
@@ -135,84 +163,32 @@ func combineData(artists []Artist, locations []Location, dates []Date, relations
 }
 
 func fetchArtists() ([]Artist, error) {
-	resp, err := http.Get("https://groupietrackers.herokuapp.com/api/artists")
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("status code %d", resp.StatusCode)
-	}
-
 	var artists []Artist
-	if err := json.NewDecoder(resp.Body).Decode(&artists); err != nil {
-		return nil, err
-	}
-	return artists, nil
+	err := fetchWithCache("https://groupietrackers.herokuapp.com/api/artists", &artists)
+	return artists, err
 }
 
 func fetchLocations() ([]Location, error) {
-	resp, err := http.Get("https://groupietrackers.herokuapp.com/api/locations")
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("locations status code %d", resp.StatusCode)
-	}
-
-	var wrapper struct {
-		Index []Location `json:"index"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&wrapper); err != nil {
-		return nil, err
-	}
-	return wrapper.Index, nil
+	var wrapper struct{ Index []Location }
+	err := fetchWithCache("https://groupietrackers.herokuapp.com/api/locations", &wrapper)
+	return wrapper.Index, err
 }
 
 func fetchDates() ([]Date, error) {
-	resp, err := http.Get("https://groupietrackers.herokuapp.com/api/dates")
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("dates status code %d", resp.StatusCode)
-	}
-
-	var wrapper struct {
-		Index []Date `json:"index"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&wrapper); err != nil {
-		return nil, err
-	}
-	return wrapper.Index, nil
+	var wrapper struct{ Index []Date }
+	err := fetchWithCache("https://groupietrackers.herokuapp.com/api/dates", &wrapper)
+	return wrapper.Index, err
 }
 
 func fetchRelations() ([]Relation, error) {
-	resp, err := http.Get("https://groupietrackers.herokuapp.com/api/relation")
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("status code %d", resp.StatusCode)
-	}
-
 	var response RelationsResponse
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
-	}
-	return response.Index, nil
+	err := fetchWithCache("https://groupietrackers.herokuapp.com/api/relation", &response)
+	return response.Index, err
 }
 
 func fetchDataPeriodically() {
 	ticker := time.NewTicker(1 * time.Minute)
-	fetchData() // Initial fetch
+	fetchData()
 	for range ticker.C {
 		fetchData()
 	}
@@ -243,7 +219,6 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-// Enhanced middleware with error handling
 func middleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
@@ -252,7 +227,6 @@ func middleware(next http.HandlerFunc) http.HandlerFunc {
 				renderError(w, http.StatusInternalServerError)
 			}
 		}()
-
 		next(w, r)
 	}
 }
@@ -268,7 +242,6 @@ func renderError(w http.ResponseWriter, status int) {
 	}
 }
 
-// Enhanced homeHandler with search suggestions
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	dataMutex.RLock()
 	defer dataMutex.RUnlock()
@@ -283,7 +256,6 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Enhanced artistHandler with error handling
 func artistHandler(w http.ResponseWriter, r *http.Request) {
 	idStr := strings.TrimPrefix(r.URL.Path, "/artist/")
 	id, err := strconv.Atoi(idStr)
@@ -313,7 +285,6 @@ func artistHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Enhanced searchHandler with prefix matching
 func searchHandler(w http.ResponseWriter, r *http.Request) {
 	query := strings.ToLower(strings.TrimSpace(r.URL.Query().Get("q")))
 	if query == "" {
@@ -326,7 +297,6 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 
 	var results []Artist
 	for _, ad := range artistsDetails {
-		// Check if artist name starts with query
 		if strings.HasPrefix(strings.ToLower(ad.Name), query) {
 			results = append(results, ad.Artist)
 		}

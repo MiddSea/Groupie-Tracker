@@ -1,3 +1,49 @@
+:root {
+    --primary: #e74c3c;
+    --secondary: #2c3e50;
+    --background: #93b8dc;
+    --text: #2c3e50;
+    --error: #c0392b;
+  }
+  
+  body {
+    font-family: 'Roboto', sans-serif;
+    color: var(--text);
+    background: var(--background);
+  }
+  
+  /* Consistent button styles */
+  .btn {
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+  }
+  
+  .primary-btn {
+    background: var(--primary);
+    color: white;
+  }
+  
+  /* Consistent card shadows */
+  .card {
+    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+  }
+
+/* WCAG-compliant contrast */
+.main-title { color: #2c3e50; }
+.artist-card { background: #ffffff; }
+
+/* Screen reader support */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+}
+
 .main-title {
     font-family: 'Rock Salt', cursive;
     text-align: center;
@@ -62,6 +108,16 @@
     font-size: 24px;
 }
 
+@media (max-width: 768px) {
+    .artist-grid {
+      grid-template-columns: 1fr;
+    }
+    
+    .header-section {
+      flex-direction: column;
+    }
+  }
+
 /* Artist Grid Styles */
 .artist-grid {
     display: grid;
@@ -118,4 +174,29 @@
 .search-container {
     max-width: 600px;
     margin: 2rem auto;
+}
+
+/* Footer Styles */
+.page-footer {
+    text-align: center;
+    padding: 2rem;
+    margin-top: 3rem;
+    color: #666;
+    border-top: 1px solid #eee;
+}
+
+.page-footer a {
+    color: #e74c3c;
+    text-decoration: none;
+}
+
+.page-footer a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .page-footer {
+        font-size: 0.9rem;
+        padding: 1rem;
+    }
 }
