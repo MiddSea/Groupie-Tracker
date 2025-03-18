@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Groupie-Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Rock+Salt&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1 class="main-title">Groupie-Tracker</h1>
+    
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search artists...">
+        <div id="suggestions"></div>
+    </div>
+
+    <div class="artist-grid">
+        {{range .}}
+        <div class="artist-card">
+            <a href="/artist/{{.ID}}">
+                <div class="card-image">
+                    <img src="{{.ImageURL}}" alt="{{.Name}}">
+                </div>
+                <div class="card-content">
+                    <h2>{{.Name}}</h2>
+                    <div class="meta-info">
+                        <p>Members: {{len .Members}}</p>
+                        <p>Founded: {{.CreationDate}}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {{end}}
+    </div>
+
+    <script src="/static/search.js"></script>
+</body>
+</html>

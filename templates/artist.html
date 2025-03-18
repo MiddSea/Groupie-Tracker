@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{.Name}} - Groupie-Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Rock+Salt&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .artist-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-section {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .artist-image {
+            width: 300px;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .basic-info {
+            flex: 1;
+        }
+
+        .info-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .concert-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .concert-table th,
+        .concert-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .concert-table th {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .member-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            margin: 5px;
+            background: #e74c3c;
+            color: white;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+
+        .location-item {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="main-title">Groupie-Tracker</h1>
+        <a href="/" class="home-button">HOME</a>
+    </header>
+
+    <div class="artist-container">
+        <div class="header-section">
+            <img src="{{.ImageURL}}" class="artist-image" alt="{{.Name}}">
+            <div class="basic-info">
+                <h1>{{.Name}}</h1>
+                <div class="meta-info">
+                    <div><strong>Founded:</strong> {{.CreationDate}}</div>
+                    <div><strong>First Album:</strong> {{.FirstAlbum}}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2>Members</h2>
+            <div class="members-list">
+                {{range .Members}}
+                <span class="member-badge">{{.}}</span>
+                {{end}}
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2>Concert History</h2>
+            <table class="concert-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range $location, $dates := .Concerts}}
+                    {{range $dates}}
+                    <tr>
+                        <td>{{.}}</td>
+                        <td>{{$location}}</td>
+                    </tr>
+                    {{end}}
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="info-section">
+            <h2>All Locations</h2>
+            <div class="location-list">
+                {{range .Locations}}
+                <div class="location-item">{{.}}</div>
+                {{end}}
+            </div>
+        </div>
+    </div>
+</body>
+</html>

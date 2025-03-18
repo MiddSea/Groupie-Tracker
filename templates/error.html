@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Error {{.StatusCode}}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="error-container">
+        <h1 class="error-code">{{.StatusCode}}</h1>
+        <p class="error-message">{{.Message}}</p>
+        <a href="/" class="home-button">Return Home</a>
+    </div>
+</body>
+</html>
