@@ -45,10 +45,15 @@
 }
 
 .main-title {
-    font-family: 'Rock Salt', cursive;
+    font-family: 'Bungee', cursive;  /* More bold-friendly font */
+    font-size: 3.5rem;               /* Increased from ~2.5rem */
+    font-weight: 900;                /* Extra bold weight */
     text-align: center;
-    color: #ff4500;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    color: #c30f3f;;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    margin: 1.5rem 0;
+    letter-spacing: -1px;            /* Tighten spacing for impact */
+    text-transform: uppercase;       /* Make it all caps */
 }
 
 .search-container {
@@ -106,6 +111,14 @@
 
 .error-message {
     font-size: 24px;
+}
+
+/* Mobile adjustment */
+@media (max-width: 768px) {
+    .main-title {
+        font-size: 2.5rem;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    }
 }
 
 @media (max-width: 768px) {
